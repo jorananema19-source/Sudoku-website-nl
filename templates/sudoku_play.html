@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+
+  <!-- Titel + navigatie -->
+  <div class="top-bar">
+    <div>
+      <h1>Sudoku {{ nl_date }}</h1>
+      <div class="meta">
+        Niveau: <strong>{{ diff_text }}</strong>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      {% if prev_url %}
+        <a class="btn" href="{{ prev_url }}">← Vorige</a>
+      {% endif %}
+
+
+      {% if next_url and (mode == "sudoku" or mode == "groter" or mode == "pack" or mode == "pack_groter") %}
+        <a class="btn" href="{{ next_url }}">Volgende →</a>
+      {% endif %}
+      <a class="btn" href="{{ archive_url }}">Archief</a>
+      <a class="btn" href="{{ print_url }}">🖨 Print</a>
+      <a class="btn" href="{{ solution_url }}">Oplossing</a>
+
+      {% if not show_size_dropdown %}
+        <a class="btn btn-danger" href="{{ bigger_url }}">Groter weergeven</a>
+      {% endif %}
+    </div>
+  </div>
+
+
+{% if show_size_dropdown %}
+<!-- =======================
+     /groter pagina
+     ======================= -->
+
+<div class="center-panel">
+
+<div class="size-bar">
+  <form method="get" action="{{ size_action_url }}">
+    <label>Grootte:</label>
+
+    <select name="size" onchange="this.form.submit()">
+      {% for s in sizes %}
+        <option value="{{ s }}" {% if s==size_key %}selected{% endif %}>
+          {{ s|capitalize }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+    <a class="btn" href="/?date={{ iso_date }}">← Terug</a>
+  </div>
+
+  <!-- Game -->
+  <section class="game-panel">
+    <div class="game-info">
+      <div class="pill">ƒ?ñ Timer <span id="timer">00:00</span></div>
+      <div class="pill">ƒ?O Fouten <span id="mistakes">0</span> / 3</div>
+    </div>
+
+    {% include "partials/game.html" %}
+  </section>
+
+</div>
+
+
+{% else %}
+<!-- =======================
+     Homepage layout
+     ======================= -->
+
+<div class="layout-2col">
+
+  <!-- LINKS: uitleg -->
+  <aside class="side-panel">
+    <h2>Hoe werkt een sudoku?</h2>
+    <p>
+      Een sudoku is een puzzel met een rooster van <strong>9×9</strong>.
+      Vul alle lege vakjes met de cijfers <strong>1 t/m 9</strong>.
+    </p>
+
+    <h3>De regels</h3>
+    <ul class="bullets">
+      <li>In elke <strong>rij</strong> komt elk cijfer 1–9 precies één keer voor.</li>
+      <li>In elke <strong>kolom</strong> komt elk cijfer 1–9 precies één keer voor.</li>
+      <li>In elk <strong>3×3 blok</strong> komt elk cijfer 1–9 precies één keer voor.</li>
+    </ul>
+
+    <h3>Tips</h3>
+    <ul class="bullets">
+      <li>Begin met rijen/kolommen met veel cijfers.</li>
+      <li>Zoek vakjes waar maar één optie mogelijk is.</li>
+      <li>Kom je vast te zitten? Wissel van blok.</li>
+    </ul>
+
+    <div class="info-box">
+      <strong>Dagelijkse sudoku</strong><br>
+      Elke dag een nieuwe puzzel. Bekijk ook het
+      <a href="{{ archive_url }}">archief</a>.
+    </div>
+  </aside>
+
+
+  <!-- RECHTS: sudoku -->
+  <section class="game-panel">
+
+    <!-- timer -->
+    <div class="game-info">
+      <div class="pill">⏱ Timer <span id="timer">00:00</span></div>
+      <div class="pill">❌ Fouten <span id="mistakes">0</span> / 3</div>
+    </div>
+
+    {% include "partials/game.html" %}
+
+  </section>
+
+</div>
+
+
+<!-- =======================
+     MEER SUDOKU'S BLOK
+     ======================= -->
+
+<div class="more-block">
+  <div class="card">
+    <h2>Veel meer sudoku’s</h2>
+    <p>Kies een moeilijkheid. Je krijgt direct een willekeurige puzzel.</p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="{{ url_for('pack_random', cat='makkelijk') }}">Makkelijk</a>
+      <a class="btn btn-primary" href="{{ url_for('pack_random', cat='gemiddeld') }}">Gemiddeld</a>
+      <a class="btn btn-primary" href="{{ url_for('pack_random', cat='moeilijk') }}">Moeilijk</a>
+      <a class="btn btn-primary" href="{{ url_for('pack_random', cat='extreem') }}">Extreem</a>
+
+      <a class="btn" href="{{ url_for('meer') }}">Kies puzzelnummer →</a>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+</div>
+{% endblock %}

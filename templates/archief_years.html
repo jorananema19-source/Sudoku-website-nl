@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <div class="top-bar">
+    <div>
+      <h1>Archief</h1>
+      <div class="meta">Tot en met vandaag zichtbaar ({{ today_nl }}).</div>
+    </div>
+    <div class="nav-buttons">
+      <a class="btn" href="{{ url_for('home') }}">Vandaag</a>
+    </div>
+  </div>
+
+  <div class="list">
+    {% for y in years %}
+      <div class="list-row">
+        <div class="list-title">{{ y }}</div>
+        <div class="list-actions">
+          <a class="btn" href="{{ url_for('archief_maanden', year=y) }}">Bekijk maanden →</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

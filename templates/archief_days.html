@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <div class="top-bar">
+    <div>
+      <h1>Archief {{ "%02d"|format(month) }}-{{ year }}</h1>
+      <div class="meta">Kies een dag.</div>
+    </div>
+    <div class="nav-buttons">
+      <a class="btn" href="{{ url_for('archief_maanden', year=year) }}">← Terug</a>
+    </div>
+  </div>
+
+  <div class="grid-links">
+    {% for d in dates %}
+      <a class="day-link" href="{{ url_for('sudoku', date=d) }}">{{ d|nl }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Kies een sudoku{% endblock %}
+{% block description %}Kies moeilijkheid, puzzelnummer en grootte. Speel direct online.{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1 class="h1">Kies een sudoku</h1>
+      <div class="meta">Kies moeilijkheid, puzzelnummer en grootte.</div>
+    </div>
+    <div class="actions">
+      <a class="btn" href="{{ url_for('home') }}">← Terug</a>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:520px;">
+    <div class="card-title">Instellingen</div>
+    <div class="card-sub">1 t/m {{ max_id }} per categorie</div>
+
+    <form id="pickForm" style="margin-top:12px; display:grid; gap:14px;">
+
+      <div style="display:grid; gap:8px;">
+        <label class="muted" for="cat"><strong>Moeilijkheid</strong></label>
+        <select id="cat" name="cat">
+          <option value="makkelijk" {% if cat=='makkelijk' %}selected{% endif %}>Makkelijk</option>
+          <option value="gemiddeld" {% if cat=='gemiddeld' %}selected{% endif %}>Gemiddeld</option>
+          <option value="moeilijk" {% if cat=='moeilijk' %}selected{% endif %}>Moeilijk</option>
+          <option value="extreem" {% if cat=='extreem' %}selected{% endif %}>Extreem moeilijk</option>
+        </select>
+      </div>
+
+      <div style="display:grid; gap:8px;">
+        <label class="muted" for="nr"><strong>Puzzelnummer</strong></label>
+        <input id="nr" name="nr" type="number" min="1" max="{{ max_id }}" value="{{ nr }}">
+        <div class="muted" style="font-size:12px;">1 t/m {{ max_id }}</div>
+      </div>
+
+      <div style="display:grid; gap:8px;">
+        <label class="muted" for="size"><strong>Grootte</strong></label>
+        <select id="size" name="size">
+          <option value="normaal" {% if size=='normaal' %}selected{% endif %}>Normaal</option>
+          <option value="klein" {% if size=='klein' %}selected{% endif %}>Klein</option>
+          <option value="groot" {% if size=='groot' %}selected{% endif %}>Groot</option>
+          <option value="extra" {% if size=='extra' %}selected{% endif %}>Extra groot</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Start →</button>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+(function(){
+  const form = document.getElementById("pickForm");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const cat = document.getElementById("cat").value;
+    const nr  = parseInt(document.getElementById("nr").value || "1", 10);
+    const size = document.getElementById("size").value;
+
+    if (size === "normaal") {
+      window.location.href = `/pack/${cat}/${nr}`;
+    } else {
+      window.location.href = `/pack/${cat}/${nr}/groter?size=${encodeURIComponent(size)}`;
+    }
+  });
+})();
+</script>
+{% endblock %}

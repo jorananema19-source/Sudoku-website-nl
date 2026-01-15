@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>{% block title %}Sudoku{% endblock %}</title>
+  <meta name="description" content="{% block description %}Dagelijkse sudoku, archief en oplossingen.{% endblock %}"/>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="{{ url_for('home') }}">
+        <span class="brand-mark">S</span>
+        <span class="brand-text">Dagelijkse Sudoku</span>
+      </a>
+
+      <nav class="topnav">
+        <a href="{{ url_for('home') }}">Vandaag</a>
+        <a href="{{ url_for('archief_jaren') }}">Archief</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© {{ current_year }} Dagelijkse Sudoku</span>
+    </div>
+  </footer>
+
+  {% block body_scripts %}{% endblock %}
+
+<script src="{{ url_for('static', filename='play.js') }}"></script>
+</body>
+</html>

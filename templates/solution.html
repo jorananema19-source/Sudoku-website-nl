@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <div class="top-bar">
+    <div>
+      <h1>Oplossing {{ nl_date }}</h1>
+      <div class="meta">Niveau: <strong>{{ diff_text }}</strong></div>
+    </div>
+
+    <div class="nav-buttons">
+      <a class="btn" href="{{ back_url if back_url is defined else url_for('sudoku', date=iso_date) }}">← Terug</a>
+      {% if next_url %}
+        <a class="btn" href="{{ next_url }}">Volgende ?</a>
+      {% endif %}
+      <a class="btn" href="{{ url_for('archief_jaren') }}">Archief</a>
+    </div>
+  </div>
+
+  <div class="solution-wrap">
+    <div class="solution-board">
+      {{ solution_grid|safe }}
+    </div>
+
+    <div class="solution-note">
+      <h3>Tip</h3>
+      <p>
+        Probeer eerst terug te kijken naar rijen/kolommen waar je bijna klaar was.
+        Vaak zit de fout in één blok.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

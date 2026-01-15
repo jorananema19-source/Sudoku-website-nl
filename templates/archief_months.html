@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <div class="top-bar">
+    <div>
+      <h1>Archief {{ year }}</h1>
+      <div class="meta">Kies een maand.</div>
+    </div>
+    <div class="nav-buttons">
+      <a class="btn" href="{{ url_for('archief_jaren') }}">← Terug</a>
+    </div>
+  </div>
+
+  <div class="list">
+    {% for m in months %}
+      <div class="list-row">
+        <div class="list-title">{{ "%02d"|format(m) }}-{{ year }}</div>
+        <div class="meta">{{ counts[m] }} dagen</div>
+        <div class="list-actions">
+          <a class="btn" href="{{ url_for('archief_dagen', year=year, month=m) }}">Bekijk dagen →</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
