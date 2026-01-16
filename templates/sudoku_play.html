@@ -147,38 +147,6 @@
 
 </div>
 
-{% block body_scripts %}
-<script>
-(() => {
-  const btn = document.getElementById("shareBtn");
-  if (!btn) return;
-  const shareUrl = "{{ canonical_url }}";
-  const shareTitle = "{{ title if title is defined else 'Sudoku' }}";
 
-  btn.addEventListener("click", async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: shareTitle, url: shareUrl });
-        return;
-      } catch (err) {
-        // ignore
-      }
-    }
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("Link gekopieerd.");
-        return;
-      } catch (err) {
-        // ignore
-      }
-    }
-
-    prompt("Kopieer deze link:", shareUrl);
-  });
-})();
-</script>
-{% endblock %}
 
 {% endblock %}
