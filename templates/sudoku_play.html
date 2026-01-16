@@ -25,7 +25,8 @@
       <a class="btn" href="{{ print_url }}">🖨 Print</a>
       <a class="btn" href="{{ solution_url }}">Oplossing</a>
 
-      {% if not show_size_dropdown %}
+            <button class=\"btn\" id=\"shareBtn\" type=\"button\">Delen</button>
+{% if not show_size_dropdown %}
         <a class="btn btn-danger" href="{{ bigger_url }}">Groter weergeven</a>
       {% endif %}
     </div>
@@ -145,4 +146,39 @@
 {% endif %}
 
 </div>
+
+{% block body_scripts %}
+<script>
+(() => {
+  const btn = document.getElementById("shareBtn");
+  if (!btn) return;
+  const shareUrl = "{{ canonical_url }}";
+  const shareTitle = "{{ title if title is defined else 'Sudoku' }}";
+
+  btn.addEventListener("click", async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, url: shareUrl });
+        return;
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link gekopieerd.");
+        return;
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    prompt("Kopieer deze link:", shareUrl);
+  });
+})();
+</script>
+{% endblock %}
+
 {% endblock %}
