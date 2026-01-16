@@ -143,7 +143,10 @@ def _nl_filter(d: str) -> str:
 
 @app.context_processor
 def inject_globals():
-    return {"current_year": date.today().year}
+    return {
+        "current_year": date.today().year,
+        "canonical_url": request.url,
+    }
 
 # -----------------------------
 # Render helpers

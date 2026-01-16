@@ -6,6 +6,7 @@
 
   <title>{% block title %}Sudoku{% endblock %}</title>
   <meta name="description" content="{% block description %}Dagelijkse sudoku, archief en oplossingen.{% endblock %}"/>
+  <link rel="canonical" href="{{ canonical_url }}">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block head_extra %}{% endblock %}
