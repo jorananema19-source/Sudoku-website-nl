@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, render_template, url_for, redirect
+from flask import Flask, request, abort, render_template, url_for, redirect, Response
 from datetime import date, timedelta
 import json
 import os
@@ -503,6 +503,49 @@ def meer():
         size=size,
         max_id=max_id,
     )
+
+# -----------------------------
+# SEO: robots.txt + sitemap.xml
+# -----------------------------
+@app.get("/robots.txt")
+def robots():
+    base = "https://dagelijksesudoku.nl"
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        f"Sitemap: {base}/sitemap.xml",
+    ]
+    return Response("\n".join(lines) + "\n", mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    base = "https://dagelijksesudoku.nl"
+    urls = [
+        f"{base}/",
+        f"{base}/archief",
+        f"{base}/meer",
+    ]
+
+    for d in VISIBLE_DATES:
+        urls.append(f"{base}/sudoku?date={d}")
+
+    items = []
+    for u in urls:
+        items.append(
+            "<url>"
+            f"<loc>{u}</loc>"
+            "</url>"
+        )
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        + "".join(items) +
+        "</urlset>"
+    )
+    return Response(xml, mimetype="application/xml")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
