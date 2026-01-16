@@ -146,6 +146,8 @@ def inject_globals():
     return {
         "current_year": date.today().year,
         "canonical_url": request.url,
+        "og_title": "Dagelijkse Sudoku",
+        "og_description": "Dagelijkse sudoku, archief en oplossingen.",
     }
 
 # -----------------------------
