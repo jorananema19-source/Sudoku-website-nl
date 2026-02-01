@@ -1,5 +1,6 @@
 from flask import Flask, request, abort, render_template, url_for, redirect, Response
 from datetime import date, timedelta
+from bisect import bisect_right
 import json
 import os
 import random
@@ -31,7 +32,7 @@ def get_daily_or_404(d_iso: str):
     return row
 
 def is_future(d_iso: str) -> bool:
-    return d_iso > TODAY_ISO
+    return d_iso > get_today_iso()
 
 def render_solution_table(solution81: str) -> str:
     # eenvoudige tabel (solution.html kan dit mooier stylen)
@@ -47,23 +48,25 @@ def render_solution_table(solution81: str) -> str:
 
 def clamp_to_visible(d_iso: str):
     # zorg dat je nooit voorbij "vandaag" navigeert via knoppen
-    if d_iso > LAST_VISIBLE:
-        return LAST_VISIBLE
+    last_visible = get_last_visible()
+    if d_iso > last_visible:
+        return last_visible
     if d_iso < ALL_DATES[0]:
         return ALL_DATES[0]
     return d_iso
 
 def nav_links_daily(d_iso: str, size_key: str):
     # prev/next alleen binnen zichtbare set (<= vandaag)
+    visible_set = get_visible_set()
     d_obj = date.fromisoformat(d_iso)
     prev_d = (d_obj - timedelta(days=1)).isoformat()
     next_d = (d_obj + timedelta(days=1)).isoformat()
 
     prev_url = url_for("sudoku", date=prev_d) if prev_d in DAILY else None
-    next_url = url_for("sudoku", date=next_d) if next_d in VISIBLE_SET else None
+    next_url = url_for("sudoku", date=next_d) if next_d in visible_set else None
 
     prev_big = url_for("groter", date=prev_d, size=size_key) if prev_d in DAILY else None
-    next_big = url_for("groter", date=next_d, size=size_key) if next_d in VISIBLE_SET else None
+    next_big = url_for("groter", date=next_d, size=size_key) if next_d in visible_set else None
 
     return prev_url, next_url, prev_big, next_big
 
@@ -80,16 +83,26 @@ ALL_DATES = sorted(DAILY.keys())
 if not ALL_DATES:
     raise RuntimeError("daily.json bevat geen puzzels.")
 
-TODAY_ISO = date.today().isoformat()
+def get_today_iso():
+    return date.today().isoformat()
 
-VISIBLE_DATES = [d for d in ALL_DATES if d <= TODAY_ISO]
-if not VISIBLE_DATES:
-    VISIBLE_DATES = ALL_DATES[:]
-VISIBLE_SET = set(VISIBLE_DATES)
-LAST_VISIBLE = VISIBLE_DATES[-1]
+def get_visible_dates(today_iso=None):
+    today_iso = today_iso or get_today_iso()
+    idx = bisect_right(ALL_DATES, today_iso)
+    if idx == 0:
+        return ALL_DATES[:]
+    return ALL_DATES[:idx]
 
-ARCHIVE = build_archive(VISIBLE_DATES)
-YEARS = sorted(ARCHIVE.keys())
+def get_visible_set(today_iso=None):
+    return set(get_visible_dates(today_iso))
+
+def get_last_visible(today_iso=None):
+    dates = get_visible_dates(today_iso)
+    return dates[-1]
+
+def get_archive(today_iso=None):
+    dates = get_visible_dates(today_iso)
+    return build_archive(dates)
 
 # -----------------------------
 # Data laden: packs
@@ -272,24 +285,25 @@ def render_pack(cat: str, n: int, size_key: str, mode: str):
 # -----------------------------
 @app.get("/")
 def home():
-    d = TODAY_ISO if TODAY_ISO in DAILY else LAST_VISIBLE
+    today = get_today_iso()
+    d = today if today in DAILY else get_last_visible(today)
     return render_daily(d, size_key="normaal", mode="sudoku")
 
 @app.get("/sudoku")
 def sudoku():
-    d = request.args.get("date", TODAY_ISO)
+    d = request.args.get("date", get_today_iso())
     size_key = norm_size(request.args.get("size", "normaal"), "normaal")
     return render_daily(d, size_key=size_key, mode="sudoku")
 
 @app.get("/groter")
 def groter():
-    d = request.args.get("date", TODAY_ISO)
+    d = request.args.get("date", get_today_iso())
     size_key = norm_size(request.args.get("size", "groot"), "groot")
     return render_daily(d, size_key=size_key, mode="groter")
 
 @app.get("/oplossing")
 def oplossing():
-    d = request.args.get("date", TODAY_ISO)
+    d = request.args.get("date", get_today_iso())
     d = clamp_to_visible(d)
     row = get_daily_or_404(d)
     diff_text = DIFF_LABEL.get(row.get("difficulty", ""), row.get("difficulty", ""))
@@ -306,7 +320,7 @@ def oplossing():
 
 @app.get("/print")
 def print_puzzle():
-    d = request.args.get("date", TODAY_ISO)
+    d = request.args.get("date", get_today_iso())
     d = clamp_to_visible(d)
     size_key = norm_size(request.args.get("size", "groot"), "groot")
     row = get_daily_or_404(d)
@@ -358,15 +372,17 @@ def print_puzzle():
 # -----------------------------
 @app.get("/archief")
 def archief_jaren():
+    archive = get_archive()
+    years = sorted(archive.keys())
     return render_template(
         "archief_years.html",
-        years=YEARS,
-        today_nl=format_nl_date(TODAY_ISO),
+        years=years,
+        today_nl=format_nl_date(get_today_iso()),
     )
 
 @app.get("/archief/<int:year>")
 def archief_maanden(year: int):
-    months = ARCHIVE.get(year)
+    months = get_archive().get(year)
     if not months:
         abort(404, f"Geen data voor {year}")
 
@@ -382,7 +398,7 @@ def archief_maanden(year: int):
 
 @app.get("/archief/<int:year>/<int:month>")
 def archief_dagen(year: int, month: int):
-    months = ARCHIVE.get(year)
+    months = get_archive().get(year)
     if not months or month not in months:
         abort(404, f"Geen data voor {year}-{month:02d}")
 
@@ -532,7 +548,7 @@ def sitemap():
         f"{base}/meer",
     ]
 
-    for d in VISIBLE_DATES:
+    for d in get_visible_dates():
         urls.append(f"{base}/sudoku?date={d}")
 
     items = []
